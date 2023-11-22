@@ -93,6 +93,29 @@ def plot_pie_chart(data, column):
     plt.title(column, color='grey')  # Set title with grey color
     return plt
 
+# Function to suggest next steps for the project manager
+def suggest_next_steps(data):
+    """
+    Analyze the data and suggest next steps for the project manager.
+    """
+    # Analyze sentiments of challenges and suggestions columns
+    challenges = data["What challenges are you currently facing in your role?"].dropna().tolist()
+    suggestions = data["What suggestions do you have for improving team efficiency or project management?"].dropna().tolist()
+
+    # Combine the lists for sentiment analysis
+    combined_text = " ".join(challenges + suggestions)
+
+    # Get sentiment analysis from OpenAI (assuming the API client is already configured)
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"Please analyze the following feedback and suggest next steps for the project manager: {combined_text}"}
+        ]
+    )
+    # Extract and return the suggestion from the response
+    return completion.choices[0].message.content
+
 
 def main():
     st.title("PM - Feedback Analysis Tool")
@@ -124,8 +147,10 @@ def main():
                     summary = summarize_sentiments(responses)
                     st.write(summary)
 
-
-
+        # New Section: Suggestions for Next Steps for Project Manager
+        st.markdown("**Next Steps for Project Manager:**")
+        next_steps = suggest_next_steps(data)
+        st.write(next_steps)
 
 
 if __name__ == "__main__":
