@@ -3,6 +3,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import openai
 from openai import OpenAI
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+import base64
+import os
+import streamlit.components.v1 as components
 
 
 st.set_page_config(
@@ -16,21 +21,19 @@ api_key = st.secrets["AI_KEY"]
 # Initialize OpenAI client
 client = OpenAI(api_key=api_key)
 
-
 def summarize_sentiments(texts):
     """
-    Summarize the sentiment of multiple statements using OpenAI's language model.
+    Summarize the overall sentiment of a collection of statements.
     """
-
-    # Aggregate all texts into one for analysis
-    combined_text = " ".join(texts)
+    # Combine all texts into a single string for analysis
+    combined_text = ". ".join(texts)
 
     # Send the combined text for sentiment analysis
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"Please summarize the sentiment of the following statements: {combined_text}"}
+            {"role": "user", "content": f"Please summarize the overall sentiment of the following text: {combined_text}"}
         ]
     )
 
@@ -73,9 +76,8 @@ def plot_pie_chart(data, column):
     # Count the unique values in the column
     counts = data[column].value_counts()
 
-    # Create a pie chart without a white background
-    # Smaller figure size and no background
-    plt.figure(figsize=(6, 6), facecolor='none')
+    # Create a pie chart with a smaller size
+    plt.figure(figsize=(4, 4), facecolor='none')  # Reduced figure size
     wedges, texts, autotexts = plt.pie(
         counts, labels=counts.index, autopct='%1.1f%%', startangle=140)
 
@@ -92,6 +94,7 @@ def plot_pie_chart(data, column):
 
     plt.title(column, color='grey')  # Set title with grey color
     return plt
+
 
 # Function to suggest next steps for the project manager
 def suggest_next_steps(data):
@@ -116,6 +119,7 @@ def suggest_next_steps(data):
     # Extract and return the suggestion from the response
     return completion.choices[0].message.content
 
+# Function to return JavaScript for screenshot
 
 def main():
     st.title("PM - Feedback Analysis Tool")
@@ -133,12 +137,29 @@ def main():
         data = load_data(uploaded_file)
         st.write(data)
 
+        # Initialize a counter to keep track of the column to use
+        column_counter = 0
+
+        # Initialize columns outside the loop
+        col1, col2 = st.columns([1, 1])  # Adjust the ratio as needed
+
         for column in data.columns:
             if data[column].dtype == 'object':
                 unique_values = data[column].dropna().unique()
                 if all(len(value.split()) < 3 for value in unique_values):
                     fig = plot_pie_chart(data, column)
-                    st.pyplot(fig)
+
+                    # Alternate between the two columns
+                    if column_counter % 2 == 0:
+                        with col1:
+                            st.pyplot(fig)
+                    else:
+                        with col2:
+                            st.pyplot(fig)
+                    
+                    # Increment the counter after each iteration
+                    column_counter += 1
+
                 else:
                     st.markdown(f"**Sentiment Analysis for: {column}**")
                     # Collect all responses for the question
@@ -152,6 +173,15 @@ def main():
         next_steps = suggest_next_steps(data)
         st.write(next_steps)
 
+
+        st.markdown(
+            '<span style="color: red">**To Print this report, press CMD+P on Mac or Ctrl+P on Windows. For better visuals, select Landscape Layout.**</span>', 
+            unsafe_allow_html=True
+        )
+
+
+
+        
 
 if __name__ == "__main__":
     main()
