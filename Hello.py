@@ -3,10 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import openai
 from openai import OpenAI
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-import base64
-import os
 import streamlit.components.v1 as components
 
 
