@@ -171,7 +171,7 @@ def main():
 
 
         st.markdown(
-            '<span style="color: red">**To Print this report, press CMD+P on Mac or Ctrl+P on Windows. For better visuals, select Landscape Layout.**</span>', 
+            '<span style="color: red">**To Print this report, press on three dots on top right**</span>', 
             unsafe_allow_html=True
         )
 
