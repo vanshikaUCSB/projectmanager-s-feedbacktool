@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 
 
 st.set_page_config(
-    page_title="PM - Feedback Analysis Tool",
+    page_title=" PM - Feedback Analysis Tool ",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -16,6 +16,7 @@ api_key = st.secrets["AI_KEY"]
 
 # Initialize OpenAI client
 client = OpenAI(api_key=api_key)
+
 
 def summarize_sentiments(texts):
     """
@@ -35,7 +36,6 @@ def summarize_sentiments(texts):
 
     # Extract the summary from the response
     return completion.choices[0].message.content
-
 
 
 def analyze_sentiment(text):
@@ -98,8 +98,10 @@ def suggest_next_steps(data):
     Analyze the data and suggest next steps for the project manager.
     """
     # Analyze sentiments of challenges and suggestions columns
-    challenges = data["What challenges are you currently facing in your role?"].dropna().tolist()
-    suggestions = data["What suggestions do you have for improving team efficiency or project management?"].dropna().tolist()
+    challenges = data["What challenges are you currently facing in your role?"].dropna(
+    ).tolist()
+    suggestions = data["What suggestions do you have for improving team efficiency or project management?"].dropna(
+    ).tolist()
 
     # Combine the lists for sentiment analysis
     combined_text = " ".join(challenges + suggestions)
@@ -117,14 +119,22 @@ def suggest_next_steps(data):
 
 # Function to return JavaScript for screenshot
 
+
 def main():
-    st.title("PM - Feedback Analysis Tool")
-    
+
+    banner_image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Deckers_Outdoor_Corporation_201x_logo.svg/1599px-Deckers_Outdoor_Corporation_201x_logo.svg.png?20191005032104"
+    centered_image_html = f"<div style='text-align: center'><img src='{banner_image_url}' width='400'></div><br>"
+    st.markdown(centered_image_html, unsafe_allow_html=True)
+
+    st.markdown("<h1 style='text-align: center;'> Feedback Sentiment Analysis Tool</h1>",
+                unsafe_allow_html=True)
+
     # Your app description or introduction
+
     st.markdown("""
-    This tool is designed to analyze and visualize participant feedback.
-    Upload your Excel file, and the app will automatically generate pie charts
-    for categorical data and provide sentiment analysis for open-ended responses.
+    Welcome! Ready to dive into your survey feedback?  
+    **Simply upload your Excel file from Google Forms, and let us do the magic.**      
+    Start now to uncover what your peers really think!  
     """)
 
     uploaded_file = st.file_uploader("Upload Excel file", type=['xlsx'])
@@ -152,7 +162,7 @@ def main():
                     else:
                         with col2:
                             st.pyplot(fig)
-                    
+
                     # Increment the counter after each iteration
                     column_counter += 1
 
@@ -169,15 +179,11 @@ def main():
         next_steps = suggest_next_steps(data)
         st.write(next_steps)
 
-
         st.markdown(
-            '<span style="color: red">**To Print this report, press on three dots on top right**</span>', 
+            '<span style="color: red">**To Print this report, press on three dots on top right**</span>',
             unsafe_allow_html=True
         )
 
-
-
-        
 
 if __name__ == "__main__":
     main()
