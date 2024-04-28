@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import openai
 from openai import OpenAI
 import streamlit.components.v1 as components
+from PIL import Image
+import base64
 
 
 st.set_page_config(
@@ -123,66 +125,81 @@ def suggest_next_steps(data):
 def main():
 
     banner_image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Deckers_Outdoor_Corporation_201x_logo.svg/1599px-Deckers_Outdoor_Corporation_201x_logo.svg.png?20191005032104"
-    centered_image_html = f"<div style='text-align: center'><img src='{banner_image_url}' width='400'></div><br>"
+    centered_image_html = f"<div style='text-align: center'><img src='{banner_image_url}' width='300'></div><br>"
     st.markdown(centered_image_html, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'> Feedback Sentiment Analysis Tool</h1>",
+    # Your app description or introduction
+    st.markdown("<h1 style='text-align: center; color: #5F7E94;'> Feedback Sentiment Analysis Tool</h1>",
                 unsafe_allow_html=True)
 
-    # Your app description or introduction
+    st.markdown("<h5 style='text-align: center; color: #5F7E94;'> Welcome! Begin now to explore insights and recommendations to enhance team collaboration!</h5>",
+                unsafe_allow_html=True)
+    st.write("")
+    st.write("")
+    st.write("")
+    col1, col2 = st.columns(2)
 
-    st.markdown("""
-    Welcome! Ready to dive into your survey feedback?  
-    **Simply upload your Excel file from Google Forms, and let us do the magic.**      
-    Start now to uncover what your peers really think!  
-    """)
+    # Access Survey Link
+    with col1:
+        st.subheader("Access Survey Link")
+        st.write("")
+        st.write("")
+        with st.expander("Please choose a feedback survey"):
+            link1 = "http://linktosurvey1.com"
+            link2 = "http://linktosurvey2.com"
+            link3 = "http://linktosurvey3.com"
 
-    uploaded_file = st.file_uploader("Upload Excel file", type=['xlsx'])
+            st.markdown(f"[Survey Link 1]({link1})")
+            st.markdown(f"[Survey Link 2]({link2})")
+            st.markdown(f"[Create Your Own Survey]({link3})")
+    # Upload Excel File for Analysis
+    with col2:
+        st.subheader("Upload Excel File for Analysis")
+        uploaded_file = st.file_uploader("Upload Excel file", type=['xlsx'])
+        if uploaded_file is not None:
+            data = load_data(uploaded_file)
+            st.write(data)
 
-    if uploaded_file is not None:
-        data = load_data(uploaded_file)
-        st.write(data)
+            # Initialize a counter to keep track of the column to use
+            column_counter = 0
 
-        # Initialize a counter to keep track of the column to use
-        column_counter = 0
+            # Initialize columns outside the loop
+            col1, col2 = st.columns([1, 1])  # Adjust the ratio as needed
 
-        # Initialize columns outside the loop
-        col1, col2 = st.columns([1, 1])  # Adjust the ratio as needed
+            for column in data.columns:
+                if data[column].dtype == 'object':
+                    unique_values = data[column].dropna().unique()
+                    if all(len(value.split()) < 3 for value in unique_values):
+                        fig = plot_pie_chart(data, column)
 
-        for column in data.columns:
-            if data[column].dtype == 'object':
-                unique_values = data[column].dropna().unique()
-                if all(len(value.split()) < 3 for value in unique_values):
-                    fig = plot_pie_chart(data, column)
+                        # Alternate between the two columns
+                        if column_counter % 2 == 0:
+                            with col1:
+                                st.pyplot(fig)
+                        else:
+                            with col2:
+                                st.pyplot(fig)
 
-                    # Alternate between the two columns
-                    if column_counter % 2 == 0:
-                        with col1:
-                            st.pyplot(fig)
+                        # Increment the counter after each iteration
+                        column_counter += 1
+
                     else:
-                        with col2:
-                            st.pyplot(fig)
+                        st.markdown(f"**Sentiment Analysis for: {column}**")
+                        # Collect all responses for the question
+                        responses = data[column].dropna().tolist()
+                        # Summarize sentiments
+                        summary = summarize_sentiments(responses)
+                        st.write(summary)
 
-                    # Increment the counter after each iteration
-                    column_counter += 1
+            # New Section: Suggestions for Next Steps for Project Manager
+            st.markdown("**Next Steps for Project Manager:**")
+            next_steps = suggest_next_steps(data)
+            st.write(next_steps)
 
-                else:
-                    st.markdown(f"**Sentiment Analysis for: {column}**")
-                    # Collect all responses for the question
-                    responses = data[column].dropna().tolist()
-                    # Summarize sentiments
-                    summary = summarize_sentiments(responses)
-                    st.write(summary)
-
-        # New Section: Suggestions for Next Steps for Project Manager
-        st.markdown("**Next Steps for Project Manager:**")
-        next_steps = suggest_next_steps(data)
-        st.write(next_steps)
-
-        st.markdown(
-            '<span style="color: red">**To Print this report, press on three dots on top right**</span>',
-            unsafe_allow_html=True
-        )
+            st.markdown(
+                '<span style="color: red">**To Print this report, press on three dots on top right**</span>',
+                unsafe_allow_html=True
+            )
 
 
 if __name__ == "__main__":
