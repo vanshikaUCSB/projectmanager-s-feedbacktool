@@ -145,12 +145,12 @@ def main():
         st.write("")
         st.write("")
         with st.expander("Please choose a feedback survey"):
-            link1 = "http://linktosurvey1.com"
-            link2 = "http://linktosurvey2.com"
-            link3 = "http://linktosurvey3.com"
+            link1 = "https://docs.google.com/forms/d/1_p6BvoJd4TkyM01UrvmgnVe5RUwKyWdeQhMJHvdxy9s/edit"
+            link2 = "https://docs.google.com/forms/d/1q2h9TkfDY4BKb8esIP3ERfVsoTKpQUsjo6kHx7B7ZDA/edit"
+            link3 = "https://docs.google.com/forms/u/0/?ec=asw-forms-globalnav-goto&tgif=d"
 
-            st.markdown(f"[Survey Link 1]({link1})")
-            st.markdown(f"[Survey Link 2]({link2})")
+            st.markdown(f"[Employee Survey]({link1})")
+            st.markdown(f"[Client Survey]({link2})")
             st.markdown(f"[Create Your Own Survey]({link3})")
     # Upload Excel File for Analysis
     with col2:
